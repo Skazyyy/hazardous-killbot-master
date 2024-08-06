@@ -1,0 +1,35 @@
+version: '3.6'
+services:
+  discordbot:
+    restart: unless-stopped
+    build:
+      context: src
+      dockerfile: Dockerfile
+    image: hazardous-killbot:latest
+    environment:
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+    volumes:
+      - ./config:/workspace/dist/config:delegated
+    ports:
+      - "127.0.0.1:4000:4000"
+
+  redis:
+    image: redis:alpine
+    # volume for redis data
+    volumes:
+      - ./redis-data:/data
+    # Make sure redis saves snapshots to disk
+    command: redis-server --appendonly yes
+
+  mongodb:
+    image: mongo:7.0.8
+    volumes:
+      - ./mongo-data:/data/db
+    ports:
+      - "127.0.0.1:27017:27017"
+
+networks:
+  default:
+    name: bot-network
+    driver: bridge
